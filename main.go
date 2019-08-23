@@ -11,6 +11,7 @@ import (
 	"strings"
 
 	"github.com/360EntSecGroup-Skylar/excelize"
+	"github.com/coderguang/GameEngine_go"
 )
 
 type DataType int32
@@ -45,6 +46,7 @@ type DataStruct struct {
 
 func (v DataStruct) Show() {
 	log.Println("表结构内容:desc:", v.desc, ",name:", v.name, ",dataType:", int(v.dataType), ",strategyType:", int(v.strategyType))
+	sglog.Info("hi")
 }
 
 func (v DataStruct) CheckEmpty() bool {
