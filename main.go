@@ -10,7 +10,7 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/Luxurioust/excelize"
+	"github.com/360EntSecGroup-Skylar/excelize"
 )
 
 type DataType int32
@@ -106,13 +106,7 @@ const TABLE_ROOT_ROW_DES int = 1
 
 func GetTypeCellAndCheck(xls *excelize.File, sheetName string) (TableType, error) {
 
-	typeCellStr, err := xls.GetCellValue(sheetName, TABLE_FORMAT_TYPECELL_POS)
-
-	if err != nil {
-		log.Println("读取配置类型 ", TABLE_FORMAT_TYPECELL_POS, " 数据报错,str=", typeCellStr)
-		log.Println(err)
-		os.Exit(1)
-	}
+	typeCellStr := xls.GetCellValue(sheetName, TABLE_FORMAT_TYPECELL_POS)
 
 	typeCellInt, err := strconv.Atoi(typeCellStr)
 	if err != nil {
@@ -145,7 +139,7 @@ func ReadField(xls *excelize.File, sheetName string) ([]DataStruct, error) {
 		if rowIndex > int(TABLE_FORMAT_ROW_DATATYPE) {
 			break
 		}
-		row, _ := rows.Columns()
+		row := rows.Columns()
 		if len(row) <= 0 {
 			break
 		}
@@ -330,7 +324,7 @@ func ParseChildXlxs(xls *excelize.File, name string, strlist string, strategyTyp
 		}
 		tmpStr := "{"
 		//每个row都是一个单独的数据
-		row, _ := rows.Columns()
+		row := rows.Columns()
 		if len(row) <= 0 {
 			break
 		}
@@ -423,7 +417,7 @@ func ParseXlxs(xls *excelize.File, sheetName string, typeCell TableType, dataStr
 
 		//数组格式每个row都是一个单独的数据
 		tmpStr := GetInnerStrPrefixByTypeCell(typeCell)
-		row, _ := rows.Columns()
+		row := rows.Columns()
 		if len(row) <= 0 {
 			break
 		}
@@ -749,7 +743,7 @@ func ReadRootField(xls *excelize.File) ([]RootDirStruct, error) {
 			rowIndex++
 			continue
 		}
-		row, _ := rows.Columns()
+		row := rows.Columns()
 		colIndex := 1
 		if len(row) <= 0 {
 			break
