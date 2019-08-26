@@ -11,7 +11,7 @@ import (
 	"strings"
 
 	"github.com/360EntSecGroup-Skylar/excelize"
-	"github.com/coderguang/GameEngine_go"
+	"github.com/coderguang/GameEngine_go/sglog"
 )
 
 type DataType int32
