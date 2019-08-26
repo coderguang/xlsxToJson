@@ -2,7 +2,8 @@ package main
 
 import (
 	"os"
-	xlsxToJsonXlsx "src/xlsxToJsonXlsx"
+	xlsxToJsonXlsx "xlsxToJson/src/xlsx"
+
 	"github.com/coderguang/GameEngine_go/sglog"
 )
 
