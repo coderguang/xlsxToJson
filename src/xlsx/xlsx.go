@@ -71,10 +71,10 @@ func StartGenConfig(xls *excelize.File, config *xlsxToJsonDef.RootDirStruct) {
 	}
 
 	filename := config.name + ".json"
-	serverStr := ParseXlxs(xls, config.name, typeCell, datalist, StrategyType_Server)
+	serverStr := ParseXlxs(xls, config.name, typeCell, datalist, xlsxToJsonDef.StrategyType_Server)
 	CheckJsonValidAndWriteFile(serverStr, config.serverDir, filename, "服务器")
 
-	clientStr := ParseXlxs(xls, config.name, typeCell, datalist, StrategyType_Client)
+	clientStr := ParseXlxs(xls, config.name, typeCell, datalist, xlsxToJsonDef.StrategyType_Client)
 	//CheckJsonValidAndWriteFile(clientStr, config.clientDir, filename, "客户端json")
 	//CheckJsonValid(clientStr)
 
@@ -163,12 +163,12 @@ func GetTypeCellAndCheck(xls *excelize.File, sheetName string) (xlsxToJsonDef.Ta
 	}
 	typeCell := TableType(typeCellInt)
 
-	if TableType_object != typeCell && TableType_array != typeCell {
+	if xlsxToJsonDef.TableType_object != typeCell && TableType_array != typeCell {
 		sglog.Error("配置类型 A1 数据错误,既不是0（数组）也不是1（对象）,当前值为:%s", typeCell)
 		sgthread.DelayExit(2)
 	}
 
-	if TableType_object == typeCell {
+	if xlsxToJsonDef.TableType_object == typeCell {
 		log.Println("该表生成的数据结构为对象")
 	} else {
 		log.Println("该表生成的数据结果为数组")
@@ -229,7 +229,7 @@ func ReadField(xls *excelize.File, sheetName string) ([]xlsxToJsonDef.DataStruct
 					sglog.Error("数据类型错误,rowIndex=%s,类型:%s", rowIndex, colCell)
 					sgthread.DelayExit(2)
 				}
-				if dataType != int(DataType_raw) && dataType != int(DataType_string) && dataType != int(DataType_link) {
+				if dataType != int(xlsxToJsonDef.DataType_raw) && dataType != int(xlsxToJsonDef.DataType_string) && dataType != int(xlsxToJsonDef.DataType_link) {
 					sglog.Error("数据类型错误,rowIndex=%s,类型:%s", rowIndex, dataType)
 					sgthread.DelayExit(2)
 				}
@@ -259,7 +259,7 @@ func ReadField(xls *excelize.File, sheetName string) ([]xlsxToJsonDef.DataStruct
 func GenColCell(xls *excelize.File, sheetName string, dataStruct *xlsxToJsonDef.DataStruct, colCell string, strategyType xlsxToJsonDef.StrategyType) string {
 	tmpColumnStr := "\"" + dataStruct.name + "\":"
 	switch dataStruct.dataType {
-	case DataType_raw:
+	case xlsxToJsonDef.DataType_raw:
 		{
 			if "" == colCell {
 				sglog.Error("解析表:%s 错误:数据类型0不允许为空，列 %s", sheetName, dataStruct.desc)
@@ -267,11 +267,11 @@ func GenColCell(xls *excelize.File, sheetName string, dataStruct *xlsxToJsonDef.
 			}
 			tmpColumnStr += colCell
 		}
-	case DataType_string:
+	case xlsxToJsonDef.DataType_string:
 		{
 			tmpColumnStr += "\"" + colCell + "\""
 		}
-	case DataType_link:
+	case xlsxToJsonDef.DataType_link:
 		{
 			tmpColumnStr += ParseChildXlxs(xls, dataStruct.name, colCell, strategyType)
 		}
@@ -280,9 +280,9 @@ func GenColCell(xls *excelize.File, sheetName string, dataStruct *xlsxToJsonDef.
 }
 
 func GetStrPrefixByTypeCell(typeCell xlsxToJsonDef.TableType) string {
-	if TableType_array == typeCell {
+	if xlsxToJsonDef.TableType_array == typeCell {
 		return "["
-	} else if TableType_object == typeCell {
+	} else if xlsxToJsonDef.TableType_object == typeCell {
 		return "{"
 	} else {
 		return ""
@@ -290,9 +290,9 @@ func GetStrPrefixByTypeCell(typeCell xlsxToJsonDef.TableType) string {
 }
 
 func GetStrSuffixByTypeCell(typeCell xlsxToJsonDef.TableType) string {
-	if TableType_array == typeCell {
+	if xlsxToJsonDef.TableType_array == typeCell {
 		return "]"
-	} else if TableType_object == typeCell {
+	} else if xlsxToJsonDef.TableType_object == typeCell {
 		return "}"
 	} else {
 		return ""
@@ -300,7 +300,7 @@ func GetStrSuffixByTypeCell(typeCell xlsxToJsonDef.TableType) string {
 }
 
 func GetInnerStrPrefixByTypeCell(typeCell xlsxToJsonDef.TableType) string {
-	if TableType_array == typeCell {
+	if xlsxToJsonDef.TableType_array == typeCell {
 		return "{"
 	} else {
 		return ""
@@ -308,7 +308,7 @@ func GetInnerStrPrefixByTypeCell(typeCell xlsxToJsonDef.TableType) string {
 }
 
 func GetInnerStrSuffixByTypeCell(typeCell xlsxToJsonDef.TableType) string {
-	if TableType_array == typeCell {
+	if xlsxToJsonDef.TableType_array == typeCell {
 		return "}"
 	} else {
 		return ""
@@ -456,7 +456,7 @@ func ParseXlxs(xls *excelize.File, sheetName string, typeCell xlsxToJsonDef.Tabl
 			continue
 		}
 
-		if TableType_object == typeCell {
+		if xlsxToJsonDef.TableType_object == typeCell {
 			if rowIndex > int(xlsxToJsonDef.TABLE_FORMAT_ROW_DATATYPE)+1 {
 				break //obj格式只有第一行数据有效
 			}
@@ -712,7 +712,7 @@ func TransformJsonTolua(str string, typeCell xlsxToJsonDef.TableType) string {
 	luaStr := "return "
 	decoder := json.NewDecoder(bytes.NewBufferString(str))
 	decoder.UseNumber()
-	if TableType_array == typeCell {
+	if xlsxToJsonDef.TableType_array == typeCell {
 		var result []interface{}
 		if err := decoder.Decode(&result); err != nil {
 			sglog.Error("TransformJsonTolua json解析失败,str=%s \nerr=", str, err)
