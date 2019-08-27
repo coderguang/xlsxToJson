@@ -1,2 +1,2 @@
-xlsxToJson test.xlsx
+xlsxToJson template.xlsx
 pause
