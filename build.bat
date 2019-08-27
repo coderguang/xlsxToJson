@@ -1,2 +1,2 @@
-configXlsx t.xlsx
+xlsxToJson test.xlsx
 pause
