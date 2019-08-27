@@ -41,7 +41,7 @@ func StartGetRoot(xls *excelize.File) {
 		sgthread.DelayExit(2)
 	}
 
-	for k, _ := range configList {
+	for k := range configList {
 		sglog.Info("开始执行生成:%s", configList[k].Name)
 		StartGenConfig(xls, &configList[k])
 		sglog.Info("执行生成 %s 完成\n==================================================================\n\n\n", configList[k].Name)
@@ -331,9 +331,9 @@ func IsIgnoreField(writeFileType xlsxToJsonDef.StrategyType, configStrategy xlsx
 	}
 	if writeFileType == configStrategy {
 		return false
-	} else {
-		return true
 	}
+	return true
+
 }
 
 //解析子表，子表的子项必然是{}格式
