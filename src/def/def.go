@@ -18,13 +18,16 @@ const (
 	StrategyType_All    StrategyType = 0
 	StrategyType_Server StrategyType = 1
 	StrategyType_Client StrategyType = 2
+	StrategyType_NoGen  StrategyType = 3
 )
 
 type TableType int32
 
 const (
-	TableType_array  TableType = 0
-	TableType_object TableType = 1
+	TableType_array     TableType = iota
+	TableType_object    TableType = iota
+	TableType_file_list TableType = iota
+	TableType_end       TableType = iota
 )
 
 type DataStruct struct {

@@ -1,13 +1,18 @@
 package main
 
 import (
+	"log"
 	"os"
 	xlsxToJsonXlsx "xlsxToJson/src/xlsx"
+
+	"github.com/coderguang/GameEngine_go/sgserver"
 
 	"github.com/coderguang/GameEngine_go/sglog"
 )
 
 func main() {
+
+	sgserver.StartLogServer("debug", "./log/", log.LstdFlags, true)
 
 	arg_num := len(os.Args) - 1
 	sglog.Info("本次需生成文件数量为 %d\n", arg_num)
