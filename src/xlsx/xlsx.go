@@ -455,10 +455,12 @@ func CheckJsonValidAndWriteFile(str string, config xlsxToJsonDef.RootDirStruct, 
 		WriteConfigFile(string(js), config.ServerDir, filename, flag)
 		svr_build_file_sum++
 	} else {
-		// WriteConfigFile(string(js), config.ClientDir, filename, flag)
-		// cli_build_file_sum++
 
 		if CheckJsonValid(str) {
+
+			WriteConfigFile(string(js), config.ClientDir, filename, flag)
+			cli_build_file_sum++
+
 			clientluaStr := TransformJsonTolua(str, typeCell)
 			luafilename := config.Name + ".lua"
 			if typeCell == xlsxToJsonDef.TableType_file_list {
