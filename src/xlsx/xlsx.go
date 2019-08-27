@@ -119,7 +119,7 @@ func ReadRootField(xls *excelize.File) ([]xlsxToJsonDef.RootDirStruct, error) {
 			}
 			dataIndex := rowIndex - int(xlsxToJsonDef.TABLE_ROOT_ROW_DES) - 1
 			if dataIndex > len(dataStructList) {
-				sglog.Error("root 表字段名称配置长度不一致 ServerDir rowIndex=%s,colIndex=%s,名称:", rowIndex, colIndex, colCell)
+				sglog.Error("root 表字段名称配置长度不一致 ServerDir rowIndex=%d,colIndex=%d,名称:%s", rowIndex, colIndex, colCell)
 				sgthread.DelayExit(2)
 			}
 
@@ -159,13 +159,13 @@ func GetTypeCellAndCheck(xls *excelize.File, sheetName string) (xlsxToJsonDef.Ta
 
 	typeCellInt, err := strconv.Atoi(typeCellStr)
 	if err != nil {
-		sglog.Error("读取配置类型 %s 数据报错,type=%s", xlsxToJsonDef.TABLE_FORMAT_TYPECELL_POS, typeCellInt)
+		sglog.Error("读取配置类型 %s 数据报错,type=%d", xlsxToJsonDef.TABLE_FORMAT_TYPECELL_POS, typeCellInt)
 		sgthread.DelayExit(2)
 	}
 	typeCell := xlsxToJsonDef.TableType(typeCellInt)
 
 	if xlsxToJsonDef.TableType_object != typeCell && xlsxToJsonDef.TableType_array != typeCell {
-		sglog.Error("配置类型 A1 数据错误,既不是0（数组）也不是1（对象）,当前值为:%s", typeCell)
+		sglog.Error("配置类型 A1 数据错误,既不是0（数组）也不是1（对象）,当前值为:%d", typeCell)
 		sgthread.DelayExit(2)
 	}
 
@@ -203,7 +203,7 @@ func ReadField(xls *excelize.File, sheetName string) ([]xlsxToJsonDef.DataStruct
 
 			dataIndex := colIndex - int(xlsxToJsonDef.TABLE_FORMAT_COLUMN_DES) - 1
 			if dataIndex > len(dataStructList) {
-				sglog.Error("字段名称配置长度不一致 rowIndex=%s,colIndex=%s,名称:", rowIndex, colIndex, colCell)
+				sglog.Error("字段名称配置长度不一致 rowIndex=%d,colIndex=%d,名称:%s", rowIndex, colIndex, colCell)
 				sgthread.DelayExit(2)
 			}
 
@@ -216,22 +216,22 @@ func ReadField(xls *excelize.File, sheetName string) ([]xlsxToJsonDef.DataStruct
 			} else if int(xlsxToJsonDef.TABLE_FORMAT_ROW_CONFIG_STRATEGY) == rowIndex {
 				StrategyTypeValue, err := strconv.Atoi(colCell)
 				if err != nil {
-					sglog.Error("策略类型错误,rowIndex=%s,类型:%s", rowIndex, colCell)
+					sglog.Error("策略类型错误,rowIndex=%d,类型:%s", rowIndex, colCell)
 					sgthread.DelayExit(2)
 				}
 				if StrategyTypeValue != int(xlsxToJsonDef.StrategyType_All) && StrategyTypeValue != int(xlsxToJsonDef.StrategyType_Server) && StrategyTypeValue != int(xlsxToJsonDef.StrategyType_Client) {
-					sglog.Error("策略类型错误,rowIndex=%s,类型:%s", rowIndex, StrategyTypeValue)
+					sglog.Error("策略类型错误,rowIndex=%d,类型:%d", rowIndex, StrategyTypeValue)
 					sgthread.DelayExit(2)
 				}
 				dataStructList[dataIndex].StrategyTypeValue = xlsxToJsonDef.StrategyType(StrategyTypeValue)
 			} else if int(xlsxToJsonDef.TABLE_FORMAT_ROW_DATATYPE) == rowIndex {
 				DataTypeValue, err := strconv.Atoi(colCell)
 				if err != nil {
-					sglog.Error("数据类型错误,rowIndex=%s,类型:%s", rowIndex, colCell)
+					sglog.Error("数据类型错误,rowIndex=%d,类型:%s", rowIndex, colCell)
 					sgthread.DelayExit(2)
 				}
 				if DataTypeValue != int(xlsxToJsonDef.DataType_raw) && DataTypeValue != int(xlsxToJsonDef.DataType_string) && DataTypeValue != int(xlsxToJsonDef.DataType_link) {
-					sglog.Error("数据类型错误,rowIndex=%s,类型:%s", rowIndex, DataTypeValue)
+					sglog.Error("数据类型错误,rowIndex=%d,类型:%d", rowIndex, DataTypeValue)
 					sgthread.DelayExit(2)
 				}
 				dataStructList[dataIndex].DataTypeValue = xlsxToJsonDef.DataType(DataTypeValue)
@@ -303,17 +303,15 @@ func GetStrSuffixByTypeCell(typeCell xlsxToJsonDef.TableType) string {
 func GetInnerStrPrefixByTypeCell(typeCell xlsxToJsonDef.TableType) string {
 	if xlsxToJsonDef.TableType_array == typeCell {
 		return "{"
-	} else {
-		return ""
 	}
+	return ""
 }
 
 func GetInnerStrSuffixByTypeCell(typeCell xlsxToJsonDef.TableType) string {
 	if xlsxToJsonDef.TableType_array == typeCell {
 		return "}"
-	} else {
-		return ""
 	}
+	return ""
 }
 
 func ConnectTwoString(firstInsert bool, oldStr string, newStr string) (bool, string) {
@@ -345,7 +343,7 @@ func ParseChildXlxs(xls *excelize.File, Name string, strlist string, StrategyTyp
 
 	dataStructList, err := ReadField(xls, sheetName)
 	if err != nil {
-		sglog.Error("解析子表数据结构:%s 错误:%s", sheetName)
+		sglog.Error("解析子表数据结构:%s 错误:%s", sheetName, err)
 		log.Println(err)
 		sgthread.DelayExit(2)
 	}
@@ -440,7 +438,7 @@ func ParseChildXlxs(xls *excelize.File, Name string, strlist string, StrategyTyp
 }
 
 func ParseXlxs(xls *excelize.File, sheetName string, typeCell xlsxToJsonDef.TableType, dataStructList []xlsxToJsonDef.DataStruct, StrategyTypeValue xlsxToJsonDef.StrategyType) string {
-	log.Println("开始解析主表:%s", sheetName)
+	sglog.Info("开始解析主表:%s", sheetName)
 	rows, err := xls.Rows(sheetName)
 	if err != nil {
 		sglog.Error("解析主表:%s 错误:", sheetName)
@@ -503,7 +501,7 @@ func WriteConfigFile(js string, dir string, fileName string, Desc string) {
 	if _, err := os.Stat(dir); err == nil {
 		//log.Println("文件夹", dir, "已存在,无需创建")
 	} else {
-		log.Println("%s 文件夹 %s 不存在,开始创建文件夹", Desc, dir)
+		sglog.Info("%s 文件夹 %s 不存在,开始创建文件夹", Desc, dir)
 		err := os.MkdirAll(dir, 0711)
 
 		if err != nil {
@@ -514,12 +512,12 @@ func WriteConfigFile(js string, dir string, fileName string, Desc string) {
 
 	// check again
 	if _, err := os.Stat(dir); err != nil {
-		log.Println("创建 %s 文件夹 %s 失败，请联系开发", Desc, dir)
+		sglog.Error("创建 %s 文件夹 %s 失败，请联系开发", Desc, dir)
 	}
 
 	file, err := os.Create(dir + "/" + fileName)
 	if nil != err {
-		sglog.Error("创建/打开 %s json文件 %s 失败,err=", Desc, fileName, err)
+		sglog.Error("创建/打开 %s json文件 %s 失败,err=%s", Desc, fileName, err)
 		sgthread.DelayExit(2)
 	}
 
@@ -529,7 +527,7 @@ func WriteConfigFile(js string, dir string, fileName string, Desc string) {
 		sglog.Error("写入 %s json文件 %s 失败,err=%s", Desc, fileName, err)
 		sgthread.DelayExit(2)
 	}
-	log.Println("写入 %s json文件 %s 到路径 %s 完成!", Desc, fileName, dir)
+	sglog.Info("写入 %s json文件 %s 到路径 %s 完成!", Desc, fileName, dir)
 }
 
 func CheckJsonValid(str string) bool {
@@ -542,9 +540,9 @@ func CheckJsonValid(str string) bool {
 }
 
 func CheckJsonValidAndWriteFile(str string, dir string, fileName string, flag string) {
-	log.Println("本次配置:%s 解析结果:", flag)
-	log.Println(str)
-	log.Println("本次 %s 解析完成,开始检测是否为合法Json格式", flag)
+	sglog.Info("本次配置:%s 解析结果:", flag)
+	sglog.Info(str)
+	sglog.Info("本次 %s 解析完成,开始检测是否为合法Json格式", flag)
 
 	var target interface{}
 	if err := json.Unmarshal([]byte(str), &target); err != nil {
@@ -552,7 +550,7 @@ func CheckJsonValidAndWriteFile(str string, dir string, fileName string, flag st
 		sgthread.DelayExit(2)
 	}
 
-	log.Println("解析 %s json成功，开始写入配置文件", flag)
+	sglog.Info("解析 %s json成功，开始写入配置文件", flag)
 	js, _ := json.MarshalIndent(&target, "", "  ")
 
 	WriteConfigFile(string(js), dir, fileName, flag)
@@ -567,7 +565,7 @@ func TransfromInterfaceTolua(result interface{}, firstRun bool) string {
 
 		sortkeys := []string{}
 
-		for k, _ := range transformdata {
+		for k := range transformdata {
 			sortkeys = append(sortkeys, k)
 		}
 
@@ -649,22 +647,22 @@ func TransfromInterfaceTolua(result interface{}, firstRun bool) string {
 				case string:
 					value, ok := v.(string)
 					if !ok {
-						sglog.Error("lua数组解析失败,数据转换失败,string,k=%s,v=%s ,vtype=%s", k, v, vtype)
+						sglog.Error("lua数组解析失败,数据转换失败,string,k=%d,v=%s ,vtype=%s", k, v, vtype)
 						sgthread.DelayExit(2)
 					}
 					tmpStr = "\"" + value + "\""
 				case bool:
 					value, ok := v.(bool)
 					if !ok {
-						sglog.Error("lua数组解析失败,数据转换失败,bool,,k=%s,v=%s", k, v)
+						sglog.Error("lua数组解析失败,数据转换失败,bool,,k=%d,v=%s", k, v)
 						sgthread.DelayExit(2)
 					}
 					tmpStr = strconv.FormatBool(value)
 				case float64:
-					sglog.Error("lua数组解析失败,数组内容不应该为float64,,k=%s,v=%s", k, v)
+					sglog.Error("lua数组解析失败,数组内容不应该为float64,,k=%d,v=%s", k, v)
 					sgthread.DelayExit(2)
 				case int64:
-					log.Println("lua数组解析失败,数组内容不应该为int64,,k=%s,v=%s", k, v)
+					sglog.Error("lua数组解析失败,数组内容不应该为int64,,k=%d,v=%s", k, v)
 					sgthread.DelayExit(2)
 				case []interface{}:
 					tmpStr += TransfromInterfaceTolua(v, false)
@@ -676,7 +674,7 @@ func TransfromInterfaceTolua(result interface{}, firstRun bool) string {
 					if err != nil {
 						vex, err := v.(json.Number).Float64()
 						if err != nil {
-							sglog.Error("lua数组解析失败,数据转换失败,222unknow,,k=%s,v=%s", k, v)
+							sglog.Error("lua数组解析失败,数据转换失败,222unknow,,k=%d,v=%s", k, v)
 							sgthread.DelayExit(2)
 						} else {
 							tmpStr += strconv.FormatFloat(vex, 'f', -1, 64)
@@ -685,7 +683,7 @@ func TransfromInterfaceTolua(result interface{}, firstRun bool) string {
 						tmpStr += strconv.FormatInt(vex, 10)
 					}
 				default:
-					sglog.Error("lua数组解析失败,数据转换失败,unknow,,k=%s,v=%s", k, v)
+					sglog.Error("lua数组解析失败,数据转换失败,unknow,,k=%d,v=%s", k, v)
 					sgthread.DelayExit(2)
 				}
 
@@ -716,7 +714,7 @@ func TransformJsonTolua(str string, typeCell xlsxToJsonDef.TableType) string {
 	if xlsxToJsonDef.TableType_array == typeCell {
 		var result []interface{}
 		if err := decoder.Decode(&result); err != nil {
-			sglog.Error("TransformJsonTolua json解析失败,str=%s \nerr=", str, err)
+			sglog.Error("TransformJsonTolua json解析失败,str=%s \nerr=%s", str, err)
 			sgthread.DelayExit(2)
 		}
 
@@ -724,7 +722,7 @@ func TransformJsonTolua(str string, typeCell xlsxToJsonDef.TableType) string {
 	} else {
 		var result map[string]interface{}
 		if err := decoder.Decode(&result); err != nil {
-			sglog.Error("TransformJsonTolua json解析失败,str=%s \nerr=", str, err)
+			sglog.Error("TransformJsonTolua json解析失败,str=%s \nerr=%s", str, err)
 			sgthread.DelayExit(2)
 		}
 		luaStr += TransfromInterfaceTolua(result, true)
