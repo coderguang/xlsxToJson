@@ -28,18 +28,18 @@ const (
 )
 
 type DataStruct struct {
-	desc         string
-	name         string
-	dataType     DataType
-	strategyType StrategyType
+	Desc              string
+	Name              string
+	DataTypeValue     DataType
+	StrategyTypeValue StrategyType
 }
 
 func (v *DataStruct) Show() {
-	sglog.Info("表结构内容:desc:%s,name:%s,dataType:%d,strategyType:%d", v.desc, v.name, int(v.dataType), int(v.strategyType))
+	sglog.Info("表结构内容:Desc:%s,Name:%s,DataTypeValue:%d,StrategyTypeValue:%d", v.Desc, v.Name, int(v.DataTypeValue), int(v.StrategyTypeValue))
 }
 
 func (v *DataStruct) CheckEmpty() bool {
-	if "" == v.desc || "" == v.name || DataType(-1) == v.dataType || StrategyType(-1) == v.strategyType {
+	if "" == v.Desc || "" == v.Name || DataType(-1) == v.DataTypeValue || StrategyType(-1) == v.StrategyTypeValue {
 		return true
 	}
 	return false
@@ -47,40 +47,40 @@ func (v *DataStruct) CheckEmpty() bool {
 
 func NewDataStruct() DataStruct {
 	return DataStruct{
-		desc:         "",
-		name:         "",
-		dataType:     DataType(-1),
-		strategyType: StrategyType(-1),
+		Desc:              "",
+		Name:              "",
+		DataTypeValue:     DataType(-1),
+		StrategyTypeValue: StrategyType(-1),
 	}
 }
 
 type RootDirStruct struct {
-	serverDir string
-	clientDir string
-	name      string
+	ServerDir string
+	ClientDir string
+	Name      string
 }
 
 func (v *RootDirStruct) Show() {
-	sglog.Info("root表内容:name:%s,clientDir:%s,serverDir:%s", v.name, v.clientDir, v.serverDir)
+	sglog.Info("root表内容:Name:%s,ClientDir:%s,ServerDir:%s", v.Name, v.ClientDir, v.ServerDir)
 }
 
 func (v *RootDirStruct) CheckEmpty() bool {
-	if "" == v.name || "" == v.serverDir || "" == v.clientDir {
+	if "" == v.Name || "" == v.ServerDir || "" == v.ClientDir {
 		return true
 	}
 	return false
 }
 
-func newRootDirStruct() RootDirStruct {
+func NewRootDirStruct() RootDirStruct {
 	return RootDirStruct{
-		serverDir: "",
-		clientDir: "",
-		name:      "",
+		ServerDir: "",
+		ClientDir: "",
+		Name:      "",
 	}
 }
 
 const TABLE_FORMAT_ROW_DES int = 1
-const TABLE_FORMAT_ROW_NAME int = 2
+const TABLE_FORMAT_ROW_Name int = 2
 const TABLE_FORMAT_ROW_CONFIG_STRATEGY int = 3
 const TABLE_FORMAT_ROW_DATATYPE int = 4
 
@@ -89,8 +89,8 @@ const TABLE_FORMAT_COLUM_REAL_DATA_INDEX int = 2
 
 const TABLE_FORMAT_TYPECELL_POS string = "A1"
 
-const TABLE_ROOT_SHEET_NAME string = "root"
-const TABLE_ROOT_COLUMN_CONFIG_NAME int = 1
+const TABLE_ROOT_SHEET_Name string = "root"
+const TABLE_ROOT_COLUMN_CONFIG_Name int = 1
 const TABLE_ROOT_COLUMN_CONFIG_SERVER_DIR int = 2
 const TABLE_ROOT_COLUMN_CONFIG_CLIENT_DIR int = 3
 const TABLE_ROOT_ROW_DES int = 1

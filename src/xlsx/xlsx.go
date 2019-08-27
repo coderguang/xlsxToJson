@@ -18,11 +18,11 @@ import (
 	"github.com/360EntSecGroup-Skylar/excelize"
 )
 
-func StartGenFile(filename string) {
+func StartGenFile(fileName string) {
 
-	sglog.Info("开始执行配置表 %s 解析到json文件\n", filename)
+	sglog.Info("开始执行配置表 %s 解析到json文件\n", fileName)
 
-	xls, err := excelize.OpenFile(filename)
+	xls, err := excelize.OpenFile(fileName)
 
 	if err != nil {
 		sglog.Error("读取文件报错,%s", err)
@@ -30,7 +30,7 @@ func StartGenFile(filename string) {
 	}
 	StartGetRoot(xls)
 
-	sglog.Info("配置表 %s 全部解析完成!\n=============\n\n", filename)
+	sglog.Info("配置表 %s 全部解析完成!\n=============\n\n", fileName)
 }
 
 func StartGetRoot(xls *excelize.File) {
@@ -42,47 +42,47 @@ func StartGetRoot(xls *excelize.File) {
 	}
 
 	for k, _ := range configList {
-		sglog.Info("开始执行生成:%s", configList[k].name)
-		StartGenConfig(xls, configList[k])
-		sglog.Info("执行生成 %s 完成\n==================================================================\n\n\n", configList[k].name)
+		sglog.Info("开始执行生成:%s", configList[k].Name)
+		StartGenConfig(xls, &configList[k])
+		sglog.Info("执行生成 %s 完成\n==================================================================\n\n\n", configList[k].Name)
 	}
 }
 
 func StartGenConfig(xls *excelize.File, config *xlsxToJsonDef.RootDirStruct) {
 
-	if "" == config.name {
+	if "" == config.Name {
 		sglog.Error("主表为空")
 		sgthread.DelayExit(2)
 	}
 
-	sglog.Info("主表sheet名称为:%s", config.name)
+	sglog.Info("主表sheet名称为:%s", config.Name)
 
-	datalist, err := ReadField(xls, config.name)
+	datalist, err := ReadField(xls, config.Name)
 
 	if err != nil {
 		sglog.Error("读取字段名称出错，ex=%s", err)
 		sgthread.DelayExit(2)
 	}
 
-	typeCell, err := GetTypeCellAndCheck(xls, config.name)
+	typeCell, err := GetTypeCellAndCheck(xls, config.Name)
 
 	if err != nil {
 		sglog.Error("获取生成配置类型错误，ex=%s", err)
 		sgthread.DelayExit(2)
 	}
 
-	filename := config.name + ".json"
-	serverStr := ParseXlxs(xls, config.name, typeCell, datalist, xlsxToJsonDef.StrategyType_Server)
-	CheckJsonValidAndWriteFile(serverStr, config.serverDir, filename, "服务器")
+	fileName := config.Name + ".json"
+	serverStr := ParseXlxs(xls, config.Name, typeCell, datalist, xlsxToJsonDef.StrategyType_Server)
+	CheckJsonValidAndWriteFile(serverStr, config.ServerDir, fileName, "服务器")
 
-	clientStr := ParseXlxs(xls, config.name, typeCell, datalist, xlsxToJsonDef.StrategyType_Client)
-	//CheckJsonValidAndWriteFile(clientStr, config.clientDir, filename, "客户端json")
+	clientStr := ParseXlxs(xls, config.Name, typeCell, datalist, xlsxToJsonDef.StrategyType_Client)
+	//CheckJsonValidAndWriteFile(clientStr, config.ClientDir, fileName, "客户端json")
 	//CheckJsonValid(clientStr)
 
 	if CheckJsonValid(clientStr) {
-		luafilename := config.name + ".lua"
+		luafileName := config.Name + ".lua"
 		clientluaStr := TransformJsonTolua(clientStr, typeCell)
-		WriteConfigFile(clientluaStr, config.clientDir, luafilename, "客户端lua")
+		WriteConfigFile(clientluaStr, config.ClientDir, luafileName, "客户端lua")
 	} else {
 		sglog.Error("生成lua配置错误，ex=%s", err)
 		sgthread.DelayExit(2)
@@ -93,9 +93,9 @@ func ReadRootField(xls *excelize.File) ([]xlsxToJsonDef.RootDirStruct, error) {
 
 	dataStructList := []xlsxToJsonDef.RootDirStruct{}
 
-	rows, err := xls.Rows(xlsxToJsonDef.TABLE_ROOT_SHEET_NAME)
+	rows, err := xls.Rows(xlsxToJsonDef.TABLE_ROOT_SHEET_Name)
 	if err != nil {
-		sglog.Error("读取 %s 错误,err=%s", xlsxToJsonDef.TABLE_ROOT_SHEET_NAME, err)
+		sglog.Error("读取 %s 错误,err=%s", xlsxToJsonDef.TABLE_ROOT_SHEET_Name, err)
 		sgthread.DelayExit(2)
 	}
 
@@ -119,18 +119,18 @@ func ReadRootField(xls *excelize.File) ([]xlsxToJsonDef.RootDirStruct, error) {
 			}
 			dataIndex := rowIndex - int(xlsxToJsonDef.TABLE_ROOT_ROW_DES) - 1
 			if dataIndex > len(dataStructList) {
-				sglog.Error("root 表字段名称配置长度不一致 serverDir rowIndex=%s,colIndex=%s,名称:", rowIndex, colIndex, colCell)
+				sglog.Error("root 表字段名称配置长度不一致 ServerDir rowIndex=%s,colIndex=%s,名称:", rowIndex, colIndex, colCell)
 				sgthread.DelayExit(2)
 			}
 
-			if int(xlsxToJsonDef.TABLE_ROOT_COLUMN_CONFIG_NAME) == colIndex {
-				tmp := newRootDirStruct()
-				tmp.name = colCell
+			if int(xlsxToJsonDef.TABLE_ROOT_COLUMN_CONFIG_Name) == colIndex {
+				tmp := xlsxToJsonDef.NewRootDirStruct()
+				tmp.Name = colCell
 				dataStructList = append(dataStructList, tmp)
 			} else if int(xlsxToJsonDef.TABLE_ROOT_COLUMN_CONFIG_SERVER_DIR) == colIndex {
-				dataStructList[dataIndex].serverDir = colCell
+				dataStructList[dataIndex].ServerDir = colCell
 			} else if int(xlsxToJsonDef.TABLE_ROOT_COLUMN_CONFIG_CLIENT_DIR) == colIndex {
-				dataStructList[dataIndex].clientDir = colCell
+				dataStructList[dataIndex].ClientDir = colCell
 			}
 			colIndex++
 		}
@@ -162,9 +162,9 @@ func GetTypeCellAndCheck(xls *excelize.File, sheetName string) (xlsxToJsonDef.Ta
 		sglog.Error("读取配置类型 %s 数据报错,type=%s", xlsxToJsonDef.TABLE_FORMAT_TYPECELL_POS, typeCellInt)
 		sgthread.DelayExit(2)
 	}
-	typeCell := TableType(typeCellInt)
+	typeCell := xlsxToJsonDef.TableType(typeCellInt)
 
-	if xlsxToJsonDef.TableType_object != typeCell && TableType_array != typeCell {
+	if xlsxToJsonDef.TableType_object != typeCell && xlsxToJsonDef.TableType_array != typeCell {
 		sglog.Error("配置类型 A1 数据错误,既不是0（数组）也不是1（对象）,当前值为:%s", typeCell)
 		sgthread.DelayExit(2)
 	}
@@ -208,33 +208,33 @@ func ReadField(xls *excelize.File, sheetName string) ([]xlsxToJsonDef.DataStruct
 			}
 
 			if int(xlsxToJsonDef.TABLE_FORMAT_ROW_DES) == rowIndex {
-				tmp := NewDataStruct()
-				tmp.desc = colCell
+				tmp := xlsxToJsonDef.NewDataStruct()
+				tmp.Desc = colCell
 				dataStructList = append(dataStructList, tmp)
-			} else if int(xlsxToJsonDef.TABLE_FORMAT_ROW_NAME) == rowIndex {
-				dataStructList[dataIndex].name = colCell
+			} else if int(xlsxToJsonDef.TABLE_FORMAT_ROW_Name) == rowIndex {
+				dataStructList[dataIndex].Name = colCell
 			} else if int(xlsxToJsonDef.TABLE_FORMAT_ROW_CONFIG_STRATEGY) == rowIndex {
-				strategyType, err := strconv.Atoi(colCell)
+				StrategyTypeValue, err := strconv.Atoi(colCell)
 				if err != nil {
 					sglog.Error("策略类型错误,rowIndex=%s,类型:%s", rowIndex, colCell)
 					sgthread.DelayExit(2)
 				}
-				if strategyType != int(xlsxToJsonDef.StrategyType_All) && strategyType != int(xlsxToJsonDef.StrategyType_Server) && strategyType != int(xlsxToJsonDef.StrategyType_Client) {
-					sglog.Error("策略类型错误,rowIndex=%s,类型:%s", rowIndex, strategyType)
+				if StrategyTypeValue != int(xlsxToJsonDef.StrategyType_All) && StrategyTypeValue != int(xlsxToJsonDef.StrategyType_Server) && StrategyTypeValue != int(xlsxToJsonDef.StrategyType_Client) {
+					sglog.Error("策略类型错误,rowIndex=%s,类型:%s", rowIndex, StrategyTypeValue)
 					sgthread.DelayExit(2)
 				}
-				dataStructList[dataIndex].strategyType = StrategyType(strategyType)
+				dataStructList[dataIndex].StrategyTypeValue = xlsxToJsonDef.StrategyType(StrategyTypeValue)
 			} else if int(xlsxToJsonDef.TABLE_FORMAT_ROW_DATATYPE) == rowIndex {
-				dataType, err := strconv.Atoi(colCell)
+				DataTypeValue, err := strconv.Atoi(colCell)
 				if err != nil {
 					sglog.Error("数据类型错误,rowIndex=%s,类型:%s", rowIndex, colCell)
 					sgthread.DelayExit(2)
 				}
-				if dataType != int(xlsxToJsonDef.DataType_raw) && dataType != int(xlsxToJsonDef.DataType_string) && dataType != int(xlsxToJsonDef.DataType_link) {
-					sglog.Error("数据类型错误,rowIndex=%s,类型:%s", rowIndex, dataType)
+				if DataTypeValue != int(xlsxToJsonDef.DataType_raw) && DataTypeValue != int(xlsxToJsonDef.DataType_string) && DataTypeValue != int(xlsxToJsonDef.DataType_link) {
+					sglog.Error("数据类型错误,rowIndex=%s,类型:%s", rowIndex, DataTypeValue)
 					sgthread.DelayExit(2)
 				}
-				dataStructList[dataIndex].dataType = DataType(dataType)
+				dataStructList[dataIndex].DataTypeValue = xlsxToJsonDef.DataType(DataTypeValue)
 			}
 			colIndex++
 		}
@@ -257,13 +257,13 @@ func ReadField(xls *excelize.File, sheetName string) ([]xlsxToJsonDef.DataStruct
 	return dataStructList, err
 }
 
-func GenColCell(xls *excelize.File, sheetName string, dataStruct *xlsxToJsonDef.DataStruct, colCell string, strategyType xlsxToJsonDef.StrategyType) string {
-	tmpColumnStr := "\"" + dataStruct.name + "\":"
-	switch dataStruct.dataType {
+func GenColCell(xls *excelize.File, sheetName string, dataStruct *xlsxToJsonDef.DataStruct, colCell string, StrategyTypeValue xlsxToJsonDef.StrategyType) string {
+	tmpColumnStr := "\"" + dataStruct.Name + "\":"
+	switch dataStruct.DataTypeValue {
 	case xlsxToJsonDef.DataType_raw:
 		{
 			if "" == colCell {
-				sglog.Error("解析表:%s 错误:数据类型0不允许为空，列 %s", sheetName, dataStruct.desc)
+				sglog.Error("解析表:%s 错误:数据类型0不允许为空，列 %s", sheetName, dataStruct.Desc)
 				sgthread.DelayExit(2)
 			}
 			tmpColumnStr += colCell
@@ -274,7 +274,7 @@ func GenColCell(xls *excelize.File, sheetName string, dataStruct *xlsxToJsonDef.
 		}
 	case xlsxToJsonDef.DataType_link:
 		{
-			tmpColumnStr += ParseChildXlxs(xls, dataStruct.name, colCell, strategyType)
+			tmpColumnStr += ParseChildXlxs(xls, dataStruct.Name, colCell, StrategyTypeValue)
 		}
 	}
 	return tmpColumnStr
@@ -339,8 +339,8 @@ func IsIgnoreField(writeFileType xlsxToJsonDef.StrategyType, configStrategy xlsx
 }
 
 //解析子表，子表的子项必然是{}格式
-func ParseChildXlxs(xls *excelize.File, name string, strlist string, strategyType xlsxToJsonDef.StrategyType) string {
-	sheetName := "link_" + name
+func ParseChildXlxs(xls *excelize.File, Name string, strlist string, StrategyTypeValue xlsxToJsonDef.StrategyType) string {
+	sheetName := "link_" + Name
 	//log.Println("开始解析子表:", sheetName, "过滤条件为:", strlist)
 
 	dataStructList, err := ReadField(xls, sheetName)
@@ -406,12 +406,12 @@ func ParseChildXlxs(xls *excelize.File, name string, strlist string, strategyTyp
 			}
 			dataStruct := dataStructList[colIndex-int(xlsxToJsonDef.TABLE_FORMAT_COLUM_REAL_DATA_INDEX)]
 
-			if IsIgnoreField(strategyType, dataStruct.strategyType) {
+			if IsIgnoreField(StrategyTypeValue, dataStruct.StrategyTypeValue) {
 				colIndex++
 				continue
 			}
 
-			tmpColumnStr := GenColCell(xls, sheetName, dataStruct, colCell, strategyType)
+			tmpColumnStr := GenColCell(xls, sheetName, &dataStruct, colCell, StrategyTypeValue)
 			firstColumInsert, tmpStr = ConnectTwoString(firstColumInsert, tmpStr, tmpColumnStr)
 			colIndex++
 		}
@@ -430,7 +430,7 @@ func ParseChildXlxs(xls *excelize.File, name string, strlist string, strategyTyp
 		sglog.Error("解析子表:%s 错误:声明的子项长度与子表搜索获得的长度不一致", sheetName)
 		sglog.Error("主表子项列表:%s", fliter_str)
 		sglog.Error("搜索所获得的的列表:%s", write_flieter_str)
-		sglog.Error(err)
+		sglog.Error("err=%s", err)
 		sgthread.DelayExit(2)
 	}
 
@@ -439,12 +439,12 @@ func ParseChildXlxs(xls *excelize.File, name string, strlist string, strategyTyp
 	return rawStr
 }
 
-func ParseXlxs(xls *excelize.File, sheetName string, typeCell xlsxToJsonDef.TableType, dataStructList []xlsxToJsonDef.DataStruct, strategyType xlsxToJsonDef.StrategyType) string {
+func ParseXlxs(xls *excelize.File, sheetName string, typeCell xlsxToJsonDef.TableType, dataStructList []xlsxToJsonDef.DataStruct, StrategyTypeValue xlsxToJsonDef.StrategyType) string {
 	log.Println("开始解析主表:%s", sheetName)
 	rows, err := xls.Rows(sheetName)
 	if err != nil {
 		sglog.Error("解析主表:%s 错误:", sheetName)
-		sglog.Error(err)
+		sglog.Error("err:%s", err)
 		sgthread.DelayExit(2)
 	}
 
@@ -481,12 +481,12 @@ func ParseXlxs(xls *excelize.File, sheetName string, typeCell xlsxToJsonDef.Tabl
 			}
 			dataStruct := dataStructList[colIndex-int(xlsxToJsonDef.TABLE_FORMAT_COLUM_REAL_DATA_INDEX)]
 
-			if IsIgnoreField(strategyType, dataStruct.strategyType) {
+			if IsIgnoreField(StrategyTypeValue, dataStruct.StrategyTypeValue) {
 				colIndex++
 				continue
 			}
 
-			tmpColumnStr := GenColCell(xls, sheetName, dataStruct, colCell, strategyType)
+			tmpColumnStr := GenColCell(xls, sheetName, &dataStruct, colCell, StrategyTypeValue)
 			firstColumInsert, tmpStr = ConnectTwoString(firstColumInsert, tmpStr, tmpColumnStr)
 			colIndex++
 		}
@@ -498,38 +498,38 @@ func ParseXlxs(xls *excelize.File, sheetName string, typeCell xlsxToJsonDef.Tabl
 	return rawStr
 }
 
-func WriteConfigFile(js string, dir string, filename string, desc string) {
+func WriteConfigFile(js string, dir string, fileName string, Desc string) {
 	// check
 	if _, err := os.Stat(dir); err == nil {
 		//log.Println("文件夹", dir, "已存在,无需创建")
 	} else {
-		log.Println("%s 文件夹 %s 不存在,开始创建文件夹", desc, dir)
+		log.Println("%s 文件夹 %s 不存在,开始创建文件夹", Desc, dir)
 		err := os.MkdirAll(dir, 0711)
 
 		if err != nil {
-			sglog.Error("创建 %s 文件夹 %s,失败", desc, dir)
+			sglog.Error("创建 %s 文件夹 %s,失败", Desc, dir)
 			sgthread.DelayExit(2)
 		}
 	}
 
 	// check again
 	if _, err := os.Stat(dir); err != nil {
-		log.Println("创建 %s 文件夹 %s 失败，请联系开发", desc, dir)
+		log.Println("创建 %s 文件夹 %s 失败，请联系开发", Desc, dir)
 	}
 
-	file, err := os.Create(dir + "/" + filename)
+	file, err := os.Create(dir + "/" + fileName)
 	if nil != err {
-		sglog.Error("创建/打开 %s json文件 %s 失败,err=", desc, filename, err)
+		sglog.Error("创建/打开 %s json文件 %s 失败,err=", Desc, fileName, err)
 		sgthread.DelayExit(2)
 	}
 
 	_, err = io.WriteString(file, string(js))
 
 	if nil != err {
-		sglog.Error("写入 %s json文件 %s 失败,err=%s", desc, filename, err)
+		sglog.Error("写入 %s json文件 %s 失败,err=%s", Desc, fileName, err)
 		sgthread.DelayExit(2)
 	}
-	log.Println("写入 %s json文件 %s 到路径 %s 完成!", desc, filename, dir)
+	log.Println("写入 %s json文件 %s 到路径 %s 完成!", Desc, fileName, dir)
 }
 
 func CheckJsonValid(str string) bool {
@@ -541,7 +541,7 @@ func CheckJsonValid(str string) bool {
 	return true
 }
 
-func CheckJsonValidAndWriteFile(str string, dir string, filename string, flag string) {
+func CheckJsonValidAndWriteFile(str string, dir string, fileName string, flag string) {
 	log.Println("本次配置:%s 解析结果:", flag)
 	log.Println(str)
 	log.Println("本次 %s 解析完成,开始检测是否为合法Json格式", flag)
@@ -555,7 +555,7 @@ func CheckJsonValidAndWriteFile(str string, dir string, filename string, flag st
 	log.Println("解析 %s json成功，开始写入配置文件", flag)
 	js, _ := json.MarshalIndent(&target, "", "  ")
 
-	WriteConfigFile(string(js), dir, filename, flag)
+	WriteConfigFile(string(js), dir, fileName, flag)
 }
 
 func TransfromInterfaceTolua(result interface{}, firstRun bool) string {
