@@ -29,13 +29,13 @@ func GetTypeCellAndCheck(xls *excelize.File, sheetName string) (xlsxToJsonDef.Ta
 
 	typeCellInt, err := strconv.Atoi(typeCellStr)
 	if err != nil {
-		sglog.Info("读取配置类型 %s 数据报错,type=%d,err=%s", xlsxToJsonDef.TABLE_FORMAT_TYPECELL_POS, typeCellInt, err)
+		sglog.Error("读取配置类型 %s 数据报错,type=%d,err=%s", xlsxToJsonDef.TABLE_FORMAT_TYPECELL_POS, typeCellInt, err)
 		sgthread.DelayExit(2)
 	}
 	typeCell := xlsxToJsonDef.TableType(typeCellInt)
 
 	if typeCell >= xlsxToJsonDef.TableType_end {
-		sglog.Info("配置类型 A1 数据错误,当前值为:%d", typeCell)
+		sglog.Error("配置类型 A1 数据错误,当前值为:%d", typeCell)
 		sgthread.DelayExit(2)
 	}
 
@@ -75,7 +75,7 @@ func ReadField(xls *excelize.File, sheetName string) ([]xlsxToJsonDef.DataStruct
 
 			dataIndex := colIndex - int(xlsxToJsonDef.TABLE_FORMAT_COLUMN_DES) - 1
 			if dataIndex > len(dataStructList) {
-				sglog.Info("字段名称配置长度不一致 rowIndex=%d,colIndex=%d,名称:%s", colIndex, rowIndex, colCell)
+				sglog.Error("字段名称配置长度不一致 rowIndex=%d,colIndex=%d,名称:%s", colIndex, rowIndex, colCell)
 				sgthread.DelayExit(2)
 			}
 
@@ -114,13 +114,13 @@ func ReadField(xls *excelize.File, sheetName string) ([]xlsxToJsonDef.DataStruct
 	}
 
 	if len(dataStructList) <= 0 {
-		sglog.Info("数据表为空,请检测:%s", sheetName)
+		sglog.Error("数据表为空,请检测:%s", sheetName)
 		sgthread.DelayExit(2)
 	}
 
 	for _, v := range dataStructList {
 		if v.CheckEmpty() {
-			sglog.Info("解析表数据结构配置错误,配置为空:表名称 %s", sheetName)
+			sglog.Error("解析表数据结构配置错误,配置为空:表名称 %s", sheetName)
 			v.Show()
 			sgthread.DelayExit(2)
 		}
@@ -135,7 +135,7 @@ func GenColCell(xls *excelize.File, sheetName string, dataStruct xlsxToJsonDef.D
 	case xlsxToJsonDef.DataType_raw:
 		{
 			if "" == colCell {
-				sglog.Info("解析表:%s 错误:数据类型0不允许为空，列 %s", sheetName, dataStruct.Desc)
+				sglog.Error("解析表:%s 错误:数据类型0不允许为空，列 %s", sheetName, dataStruct.Desc)
 				sgthread.DelayExit(2)
 			}
 			tmpColumnStr += colCell
@@ -218,13 +218,13 @@ func ParseChildXlxs(xls *excelize.File, Name string, strlist string, strategyTyp
 
 	dataStructList, err := ReadField(xls, sheetName)
 	if err != nil {
-		sglog.Info("解析子表数据结构:%s, 错误:%s", sheetName, err)
+		sglog.Error("解析子表数据结构:%s, 错误:%s", sheetName, err)
 		sgthread.DelayExit(2)
 	}
 
 	rows, err := xls.Rows(sheetName)
 	if err != nil {
-		sglog.Info("解析子表:%s,错误:%s", sheetName, err)
+		sglog.Error("解析子表:%s,错误:%s", sheetName, err)
 		sgthread.DelayExit(2)
 	}
 
@@ -302,10 +302,10 @@ func ParseChildXlxs(xls *excelize.File, Name string, strlist string, strategyTyp
 	rawStr += "]"
 
 	if strlist != "" && (len(fliter_str) != len(write_flieter_str)) {
-		sglog.Info("解析子表:%s错误:声明的子项长度与子表搜索获得的长度不一致", sheetName)
-		sglog.Info("主表子项列表:%s", fliter_str)
-		sglog.Info("搜索所获得的的列表:%s", write_flieter_str)
-		sglog.Info("err:%s", err)
+		sglog.Error("解析子表:%s错误:声明的子项长度与子表搜索获得的长度不一致", sheetName)
+		sglog.Error("主表子项列表:%s", fliter_str)
+		sglog.Error("搜索所获得的的列表:%s", write_flieter_str)
+		sglog.Error("err:%s", err)
 		sgthread.DelayExit(2)
 	}
 
@@ -319,7 +319,7 @@ func ParseXlxs(xls *excelize.File, config xlsxToJsonDef.RootDirStruct, typeCell 
 	sglog.Info("开始解析主表:%s", sheetName)
 	rows, err := xls.Rows(sheetName)
 	if err != nil {
-		sglog.Info("解析主表:%s 错误:", sheetName)
+		sglog.Error("解析主表:%s 错误:", sheetName)
 		sglog.Error("error:%s", err)
 		sgthread.DelayExit(2)
 	}
@@ -397,7 +397,7 @@ func WriteConfigFile(js string, dir string, filename string, Desc string) {
 		err := os.MkdirAll(dir, 0711)
 
 		if err != nil {
-			sglog.Info("创建  %s 文件夹 %s,失败", Desc, dir)
+			sglog.Error("创建  %s 文件夹 %s,失败", Desc, dir)
 			sglog.Error("error:%s", err)
 			sgthread.DelayExit(2)
 		}
@@ -791,7 +791,7 @@ func StartGenFile(filename string) {
 	xls, err := excelize.OpenFile(filename)
 
 	if err != nil {
-		sglog.Info("读取文件报错")
+		sglog.Error("读取文件报错")
 		sglog.Error("error:%s", err)
 		sgthread.DelayExit(2)
 	}
