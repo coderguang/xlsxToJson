@@ -2,7 +2,7 @@ xlsxToJson
 ===
 [![Build Status](https://travis-ci.org/coderguang/xlsxToJson.svg?branch=master)](https://travis-ci.org/coderguang/xlsxToJson)
 ![](https://img.shields.io/badge/language-golang-orange.svg)
-[![codebeat badge](https://codebeat.co/badges/a4d5f264-4add-4c65-b855-6a5b474da06e)](https://codebeat.co/projects/github-com-coderguang-xlsxtojson-master)
+[![codebeat badge](https://codebeat.co/badges/e3189da4-243c-4a00-a052-dd9f2fba708b)](https://codebeat.co/projects/github-com-coderguang-xlsxtojson-master)
 [![](https://img.shields.io/badge/wp-@royalchen-blue.svg)](https://www.royalchen.com)
 
 ## **a tool to generate json and lua config data by xlsx**
